@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a new pokemon</title>
+    <script defer src="index.js"></script>
+</head>
+<body>
+    <h2>Create a New Pokémon</h2>
+  <form id="createPokemonForm" action="/pokemon" method="POST">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br></input>
+    
+    <label for="type1">Type 1:</label><br>
+    <input type="text" id="type1" name="type1" required><br><br></input>
+    
+    <label for="type2">Type 2:</label><br>
+    <input type="text" id="type2" name="type2"><br><br></input>
+    
+    <label for="height">Height:</label><br>
+    <input type="number" id="height" name="height" required><br><br></input>
+    
+    <label for="weight">Weight:</label><br>
+    <input type="number" id="weight" name="weight" required><br><br></input>
+    
+    <label for="ability">Select Ability:</label><br>
+    <select id="ability" name="ability">
+      <option value="overgrow">Overgrow</option>
+      <option value="blaze">Blaze</option>
+      <option value="torrent">Torrent</option>
+      <!-- Add more options as needed -->
+    </select><br><br>
+
+    <button type="submit">Create Pokémon</button>
+  </form>
+</body>
+</html>
