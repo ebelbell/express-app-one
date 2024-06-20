@@ -7,12 +7,18 @@ const port = 3000;
 //   res.send('Hello World!');
 // });
 
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+
 // middleware to parse JSON bodies 
 app.use(express.json());
 // middleware to serve static files (like HTML)
 app.use(express.static('public'));
 
-let pokemons = [];
+let pokemons = [
+    { name: 'Pikachu', type: 'Electric', height: 0.4, weight: 6, ability: 'Static' },
+    { name: 'Charmander', type: 'Fire', height: 0.6, weight: 8.5, ability: 'Blaze' }
+];
 
 // function to fetch data from the Pokémon API
 const fetchFromPokeAPI = async (endpoint) => {
@@ -42,7 +48,6 @@ app.get('/ability/:nameOrId', async (req, res) => { //the URL is the GET route
 // POST route to create a new Pokémon 
 app.post('/pokemon', (req, res) => {
     const { name, type, height, weight, ability } = req.body;
-    
     try {
       // creating a new Pokémon in a hypothetical database
       const newPokemon = {
@@ -107,6 +112,11 @@ app.get('/pokemon', (req, res) => {
     
     res.json(filteredPokemons);
 });
+
+// route to render a view with all Pokémon
+app.get('/view-pokemons', (req, res) => {
+    res.render('pokemon-list', { pokemons });
+  });
 
   // start the server
 app.listen(port, () => {
