@@ -1,4 +1,5 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const app = express();
 const port = 3000;
 
@@ -7,33 +8,23 @@ const port = 3000;
 //   res.send('Hello World!');
 // });
 
-// Set EJS as the view engine
-app.set('view engine', 'ejs');
 
 // middleware to parse JSON bodies 
 app.use(express.json());
-// middleware to serve static files (like HTML)
-app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('styles'));
 
 let pokemons = [
     { name: 'Pikachu', type: 'Electric', height: 0.4, weight: 6, ability: 'Static' },
     { name: 'Charmander', type: 'Fire', height: 0.6, weight: 8.5, ability: 'Blaze' }
 ];
 
-// function to fetch data from the Pokémon API
-const fetchFromPokeAPI = async (endpoint) => {
-    // GET URL
-    try {
-        const response = await fetch(`https://pokeapi.co/api/v2/${endpoint}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch data from PokeAPI');
-        }
-        return await response.json();
-      } catch (error) {
-        throw new Error('Failed to fetch data from PokeAPI', error.message);
-      }
-    };
+// Home page
+app.get('/', (req, res) => {
+    res.send(`Gotta catch em all`);
+});
   
+
 // GET route to get details of a specific Pokémon ability by name or ID
 app.get('/ability/:nameOrId', async (req, res) => { //the URL is the GET route
     const nameOrId = req.params.nameOrId.toLowerCase(); //change the nameOrId parameter to lowercase
@@ -94,31 +85,11 @@ app.put('/pokemon/:id', (req, res) => {
     res.json({ message: 'Pokemon updated successfully', pokemon: updatedPokemon });
   });
 
-// GET route to fetch all Pokémon with optional filtering
-app.get('/pokemon', (req, res) => {
-    const { name, type, ability, minHeight, maxHeight, minWeight, maxWeight } = req.query;
-    
-    let filteredPokemons = pokemons;
-
-    if (minHeight) {
-        filteredPokemons = filteredPokemons.filter(p => p.height >= parseInt(minHeight));
-    } else if (maxHeight) {
-        filteredPokemons = filteredPokemons.filter(p => p.height <= parseInt(maxHeight));
-    } else if (minWeight) {
-        filteredPokemons = filteredPokemons.filter(p => p.weight >= parseInt(minWeight));
-    } else if (maxWeight) {
-        filteredPokemons = filteredPokemons.filter(p => p.weight <= parseInt(maxWeight));
-    }
-    
-    res.json(filteredPokemons);
-});
-
-// route to render a view with all Pokémon
-app.get('/view-pokemons', (req, res) => {
-    res.render('pokemon-list', { pokemons });
-  });
-
   // start the server
 app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
+  console.log(`Server is running at http://localhost: ${port}`);
 });
+
+
+
+
