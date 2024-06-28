@@ -51,6 +51,7 @@
   ],
   "dependencies": {
     "express": "^4.19.2",
+    "mongoose": "^8.4.4",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -61,7 +62,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node index.js"
+    "serve": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",

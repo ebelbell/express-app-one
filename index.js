@@ -1,9 +1,11 @@
 const express = require('express'); // require the express package
 const app = express(); // call express
 
-// const fetch = require('node-fetch');
-// const path = require('path'); 
-const port = 3000;
+const PORT = process.env.PORT || 3000;
+const bookRouter = require('./routes/books.js');
+const memberRouter = require('./routes/members.js');
+const commentRouter = require('./routes/comments.js');
+
 
 // //define a route for the root URL
 // app.get('/', (req, res) => {
@@ -11,152 +13,123 @@ const port = 3000;
 // });
 
 
-// Home page, declare the root directory '/'; access the callback function with parameter (req, res)
-app.get('/', (req, res) => {
-  res.send('Gotta catch em all');
+// Body parser middlware
+// we have access to the parsed data within our routes.
+// The parsed data will be located in "req.body".
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// New logging middleware to help us keep track of
+// requests during testing!
+app.use((req, res, next) => {
+  const time = new Date();
+
+  console.log(
+    `-----
+${time.toLocaleTimeString()}: Received a ${req.method} request to ${req.url}.`
+  );
+  if (Object.keys(req.body).length > 0) {
+    console.log('Containing the data:');
+    console.log(`${JSON.stringify(req.body)}`);
+  }
+  next();
 });
 
-// // middleware to parse JSON bodies 
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.static('public')); // static files from the 'public' folder
+// Valid API Keys.
+const apiKeys = ['perscholas', 'ps-example', 'hJAsknw-L198sAJD-l3kasx'];
 
-// let pokemons = [
-//   { id: 1, name: 'Pikachu', type: 'Electric', height: 0.4, weight: 6, ability: 'Static' },
-//   { id: 2, name: 'Charmander', type: 'Fire', height: 0.6, weight: 8.5, ability: 'Blaze' }
-// ];
+// New middleware to check for API keys!
+// Note that if the key is not verified,
+// we do not call next(); this is the end.
+// This is why we attached the /api/ prefix
+// to our routing at the beginning!
 
-  
-// // Function to fetch data from the Pokémon API
-// const fetchFromPokeAPI = async (endpoint) => {
-//   try {
-//       const response = await fetch(`https://pokeapi.co/api/v2/${endpoint}`);
-//       if (!response.ok) {
-//         throw new Error('Failed to fetch data from PokeAPI');
-//       }
-//       return await response.json();
-//   } catch (error) {
-//       throw new Error(`Failed to fetch data from PokeAPI: ${error.message}`);
+// app.use('/api', function (req, res, next) {
+//   var key = req.query['api-key'];
+
+//   // Check for the absence of a key.
+//   if (!key) {
+//     res.status(400);
+//     return res.json({ error: 'API Key Required' });
 //   }
-// };
 
-// // GET route to get details of a specific Pokémon ability by name or ID
-// app.get('/ability/:nameOrId', async (req, res) => { //the URL is the GET route
-//     const nameOrId = req.params.nameOrId.toLowerCase(); //change the nameOrId parameter to lowercase
-//     try {
-//       const data = await fetchFromPokeAPI(`ability/${nameOrId}`);
-//       res.json(data);
-//     } catch (error) {
-//         res.status(500).send('An error occurred');
-//       }
-//   });
-
-
-// // // Simple GET route
-// // app.get('/pokemon', (req, res) => {
-// //   res.json(pokemons);
-// // });
-
-
-// // POST route to create a new Pokémon 
-// app.post('/pokemon', (req, res) => {
-//     const { name, type, height, weight, ability } = req.body;
-//     try {
-//       // creating a new Pokémon in a hypothetical database
-//       const newPokemon = {
-//         id: pokemons.length + 1,
-//         name,
-//         type,
-//         height,
-//         weight,
-//         ability
-//       };
-
-//       // saving to a database
-//       pokemons.push(newPokemon);
-  
-//       // Example: Save newPokemon to database or perform other operations
-//       // return a response that pokemon is created
-//       res.status(201).json({ message: 'Pokemon created successfully', pokemon: newPokemon });
-//     } catch (error) {
-//       res.status(500).send('Failed to create Pokemon');
-//     }
-//   });
-
-// // PUT route to update an existing Pokémon by Id
-// app.put('/pokemon/:id', (req, res) => {
-//     const id = parseInt(req.params.id);
-//     const { name, type, height, weight, ability } = req.body;
-  
-//     // find the index of a pokemon by id
-//     const pokemonIndex = pokemons.findIndex(p => p.id === id); // check if the id of each object matches the id value in the req.params.id
-//     if (pokemonIndex === -1) {
-//       return res.status(404).send('Pokemon not found');
-//     }
-  
-//     const updatedPokemon = {
-//       id,
-//       name,
-//       type,
-//       height,
-//       weight,
-//       ability
-//     };
-  
-//     pokemons[pokemonIndex] = updatedPokemon;
-  
-//     res.json({ message: 'Pokemon updated successfully', pokemon: updatedPokemon });
-//   });
-
-// // DELETE route to remove a Pokémon by Id
-// app.delete('/pokemon/:id', (req, res) => {
-//   const id = parseInt(req.params.id);
-//   const pokemonIndex = pokemons.findIndex(p => p.id === id);
-//   if (pokemonIndex === -1) {
-//       return res.status(404).send('Pokemon not found');
+//   // Check for key validity.
+//   if (apiKeys.indexOf(key) === -1) {
+//     res.status(401);
+//     return res.json({ error: 'Invalid API Key' });
 //   }
-//   pokemons.splice(pokemonIndex, 1);
-//   res.json({ message: 'Pokemon deleted successfully' });
+
+//   // Valid key! Store it in req.key for route access.
+//   req.key = key;
+//   next();
 // });
 
-// // GET route to fetch all Pokémon with optional filtering
-// app.get('/pokemon', (req, res) => {
-//   const { name, type, ability, minHeight, maxHeight, minWeight, maxWeight } = req.query;
-//   let filteredPokemons = pokemons;
+// API Routes
+app.use('/api/books', bookRouter);
+app.use('/api/members', memberRouter);
+app.use('/api/comments', commentRouter);
 
-//   if (minHeight) filteredPokemons = filteredPokemons.filter(p => p.height >= parseFloat(minHeight));
-//   if (maxHeight) filteredPokemons = filteredPokemons.filter(p => p.height <= parseFloat(maxHeight));
-//   if (minWeight) filteredPokemons = filteredPokemons.filter(p => p.weight >= parseFloat(minWeight));
-//   if (maxWeight) filteredPokemons = filteredPokemons.filter(p => p.weight <= parseFloat(maxWeight));
+app.get('/', (req, res) => {
+  res.json({
+    links: [
+      {
+        href: '/api',
+        rel: 'api',
+        type: 'GET',
+      },
+    ],
+  });
+});
 
-//   res.json(filteredPokemons);
-// });
+// Adding some HATEOAS links.
+app.get('/api', (req, res) => {
+  res.json({
+    links: [
+      {
+        href: 'api/books',
+        rel: 'books',
+        type: 'GET',
+      },
+      {
+        href: 'api/books',
+        rel: 'books',
+        type: 'POST',
+      },
+      {
+        href: 'api/members',
+        rel: 'members',
+        type: 'GET',
+      },
+      {
+        href: 'api/members',
+        rel: 'members',
+        type: 'POST',
+      },
+    ],
+  });
+});
 
-// // Route to render a view with all Pokémon
-// app.get('/view-pokemons', (req, res) => {
-//   res.sendFile('new-pokemon.html', { root: path.join(__dirname, 'public') });
-// });
+app.get('/members/new', (req, res) => {
+  res.send(`
+    <div> 
+      <h1>Create a Member</h1>
+      <form action="/api/users?api-key=perscholas"  method="POST">
+        Name: <input type="text" name="name" /> <br />
+        Username: <input type="text" name="username" /> <br />
+        Email: <input type="text" name="email" /> <br />
+        <input type="submit" value="Create Member" />
+      </form>
+    </div>
+  `);
+});
 
-// // Route to handle form submission for adding a new Pokémon
-// app.post('/new-pokemon', (req, res) => {
-//   const { name, type, height, weight, ability } = req.body;
-//   const newPokemon = { id: pokemons.length + 1, name, type, height, weight, ability };
-//   pokemons.push(newPokemon);
-//   res.redirect('/view-pokemons');
-// });
 
-// // Error-handling middleware
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).send('Something broke!');
-// });
+// The only way this middlware runs is if a route handler function runs the "next()" function
+app.use((req, res) => {
+  res.status(404);
+  res.json({ error: 'Resource Not Found' });
+});
 
-// // 404 middleware
-// app.use((req, res) => {
-//   res.status(404).send('Page not found');
-// });
-
-// start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost: ${port}`);
+app.listen(PORT, () => {
+  console.log('Server running on port: ' + PORT);
 });
