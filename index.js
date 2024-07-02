@@ -1,23 +1,23 @@
 const express = require('express'); // require the express package
 const app = express(); // call express
-
 const PORT = process.env.PORT || 3000;
-const bookRouter = require('./routes/books.js');
+
 const memberRouter = require('./routes/members.js');
-const commentRouter = require('./routes/comments.js');
+const bookRouter = require('./routes/books.js');
+
+// serve static files from the STYLES directory
+// app.use(express.static('./styles.css'));
 
 
-// //define a route for the root URL
-// app.get('/', (req, res) => {
-//   res.send('Hello World!');
-// });
+//const comment = require('./data/comments.js');
+//=============================================================
 
-
-// Body parser middlware
+// Body parser middleware to parse JSON data
 // we have access to the parsed data within our routes.
-// The parsed data will be located in "req.body".
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// The parsed data will be located in "req.body."
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json()); // when the client serves off data
+
 
 // New logging middleware to help us keep track of
 // requests during testing!
@@ -35,6 +35,8 @@ ${time.toLocaleTimeString()}: Received a ${req.method} request to ${req.url}.`
   next();
 });
 
+
+
 // Valid API Keys.
 const apiKeys = ['perscholas', 'ps-example', 'hJAsknw-L198sAJD-l3kasx'];
 
@@ -44,31 +46,35 @@ const apiKeys = ['perscholas', 'ps-example', 'hJAsknw-L198sAJD-l3kasx'];
 // This is why we attached the /api/ prefix
 // to our routing at the beginning!
 
-// app.use('/api', function (req, res, next) {
-//   var key = req.query['api-key'];
+app.use('/api', function (req, res, next) {
+  var key = req.query['api-key'];
 
-//   // Check for the absence of a key.
-//   if (!key) {
-//     res.status(400);
-//     return res.json({ error: 'API Key Required' });
-//   }
+  // Check for the absence of a key.
+  if (!key) {
+    res.status(400);
+    return res.json({ error: 'API Key Required' });
+  }
 
-//   // Check for key validity.
-//   if (apiKeys.indexOf(key) === -1) {
-//     res.status(401);
-//     return res.json({ error: 'Invalid API Key' });
-//   }
+  // Check for key validity.
+  if (apiKeys.indexOf(key) === -1) {
+    res.status(401);
+    // this means that the key that was given is NOT a part of the array
+    return res.json({ error: 'Invalid API Key' });
+  }
 
-//   // Valid key! Store it in req.key for route access.
-//   req.key = key;
-//   next();
-// });
+  // Valid key! Store it in req.key for route access.
+  req.key = key;
+  next();
+});
 
-// API Routes
-app.use('/api/books', bookRouter);
+
+//=================================================
+// API routes
 app.use('/api/members', memberRouter);
-app.use('/api/comments', commentRouter);
+app.use('/api/books', bookRouter);
 
+//=================================================
+// Add some HATEOAS links
 app.get('/', (req, res) => {
   res.json({
     links: [
@@ -86,48 +92,42 @@ app.get('/api', (req, res) => {
   res.json({
     links: [
       {
-        href: 'api/books',
-        rel: 'books',
+        href: 'api/members',
+        rel: 'members',
         type: 'GET',
       },
       {
-        href: 'api/books',
-        rel: 'books',
+        href: 'api/members',
+        rel: 'members',
         type: 'POST',
       },
       {
-        href: 'api/members',
-        rel: 'members',
+        href: 'api/books',
+        rel: 'books',
         type: 'GET',
       },
       {
-        href: 'api/members',
-        rel: 'members',
+        href: 'api/books',
+        rel: 'books',
         type: 'POST',
       },
     ],
   });
 });
 
-app.get('/members/new', (req, res) => {
-  res.send(`
-    <div> 
-      <h1>Create a Member</h1>
-      <form action="/api/users?api-key=perscholas"  method="POST">
-        Name: <input type="text" name="name" /> <br />
-        Username: <input type="text" name="username" /> <br />
-        Email: <input type="text" name="email" /> <br />
-        <input type="submit" value="Create Member" />
-      </form>
-    </div>
-  `);
+
+
+// //define a route for the root URL
+app.get('/', (req, res) => {
+  res.send('Hello World!');
 });
 
-
 // The only way this middlware runs is if a route handler function runs the "next()" function
+// 404 Middleware
 app.use((req, res) => {
+  //console.log(2);
   res.status(404);
-  res.json({ error: 'Resource Not Found' });
+  res.json({ Error: 'Resource Not Found' });
 });
 
 app.listen(PORT, () => {

@@ -10,4 +10,3 @@ Objectives:
 - Interact with a self-made API through HTML forms.
 
 
-The Pokémon API documentation can be found at https://pokeapi.co/docs/v2
