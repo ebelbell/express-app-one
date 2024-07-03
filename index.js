@@ -5,11 +5,12 @@ const PORT = process.env.PORT || 3000;
 const memberRouter = require('./routes/members.js');
 const bookRouter = require('./routes/books.js');
 
-// serve static files from the STYLES directory
-// app.use(express.static('./styles.css'));
+// Serve static files from the "public" directory
+app.use(express.static('public'));
 
-
-//const comment = require('./data/comments.js');
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', './views');
 //=============================================================
 
 // Body parser middleware to parse JSON data
@@ -115,12 +116,16 @@ app.get('/api', (req, res) => {
   });
 });
 
-
+// Route to render the form
+app.get('/members/new', (req, res) => {
+  res.render('index');
+});
 
 // //define a route for the root URL
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
+
 
 // The only way this middlware runs is if a route handler function runs the "next()" function
 // 404 Middleware
