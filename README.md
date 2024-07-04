@@ -9,4 +9,9 @@ Objectives:
 - Use a template engine to render views with Express.
 - Interact with a self-made API through HTML forms.
 
+=======================================================
+root page: http://localhost:3000/
 
+view members: http://localhost:3000/api/members
+
+view books: http://localhost:3000/api/books
