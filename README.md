@@ -15,3 +15,5 @@ root page: http://localhost:3000/
 view members: http://localhost:3000/api/members
 
 view books: http://localhost:3000/api/books
+
+view html form rendered to the server: http://localhost:3000/members/new
